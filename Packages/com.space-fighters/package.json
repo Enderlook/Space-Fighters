@@ -1,0 +1,11 @@
+{
+  "name": "com.space-fighters",
+  "version": "0.1.0",
+  "displayName": "Space Fighters",
+  "description": "",
+  "keywords": [
+  ],
+  "dependencies": {
+    "com.enderlook.unity.audio_manager": "https://github.com/Enderlook/Unity-Audio-Manager.git?path=Packages/com.enderlook.unity.audio_manager#com.enderlook.unity.audio_manager/v0.2.0"
+  }
+}
