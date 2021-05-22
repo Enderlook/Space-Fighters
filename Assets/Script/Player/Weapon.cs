@@ -1,4 +1,6 @@
-﻿using Photon.Pun;
+﻿using Enderlook.Unity.AudioManager;
+
+using Photon.Pun;
 
 using UnityEngine;
 
@@ -14,6 +16,9 @@ namespace Game.Player
 
         [SerializeField, Tooltip("Force applied to projectile.")]
         private float force;
+
+        [SerializeField, Tooltip("Sound played when shooting.")]
+        private AudioUnit shootSound;
 
         [Header("Setup")]
         [SerializeField, Tooltip("Cooldown between shoots.")]
@@ -48,7 +53,11 @@ namespace Game.Player
                 Rigidbody2D instanceRigidbody = instance.GetComponent<Rigidbody2D>();
                 instanceRigidbody.velocity = rigidbody.velocity;
                 instanceRigidbody.AddForce(shootPoint.up * force, ForceMode2D.Impulse);
+                photonView.RPC(nameof(PlayShootSound), RpcTarget.All);
             }
         }
+
+        [PunRPC]
+        private void PlayShootSound() => AudioController.PlayOneShoot(shootSound, rigidbody.position);
     }
 }

@@ -254,6 +254,7 @@ MonoBehaviour:
   invulnerabilityDuration: 2
   invulnerabilityTone: 0.8
   dieTrigger: Die
+  dieSound: {fileID: 11400000, guid: a2a7fae76dc1deb4385e0d3f60c28b8b, type: 2}
 --- !u!114 &4305191806593427144
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -287,6 +288,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   projectile: Bullet
   force: 5
+  shootSound: {fileID: 11400000, guid: 6c379c9e49203c8468060e4ef18bb504, type: 2}
   shootCooldown: 0.35
   shootKey: 113
   shootPoint: {fileID: 893431024562968846}

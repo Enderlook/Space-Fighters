@@ -9,21 +9,21 @@ namespace Game.Player
     {
 #pragma warning disable CS0649
         [Header("Colors")]
-        [SerializeField]
+        [SerializeField, Tooltip("Color of enemy ships.")]
         private Color enemyColor = Color.red;
 
-        [SerializeField]
+        [SerializeField, Tooltip("Color of player ship.")]
         private Color playerColor = Color.white;
 
         [Header("Invulnerability")]
-        [SerializeField]
+        [SerializeField, Tooltip("Amount of seconds invulnerability last.")]
         private float invulnerabilityDuration = 2;
 
-        [SerializeField, Range(0, 1)]
+        [SerializeField, Range(0, 1), Tooltip("Color multiplier of ship when invulnerable.")]
         private float invulnerabilityTone = .8f;
 
         [Header("Animations")]
-        [SerializeField]
+        [SerializeField, Tooltip("Name of die animation trigger.")]
         private string dieTrigger;
 #pragma warning restore CS0649
 
