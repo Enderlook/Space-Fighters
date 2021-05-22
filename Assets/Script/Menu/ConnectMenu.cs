@@ -32,7 +32,13 @@ namespace Game.Menu
         private Button joinRoom;
 
         [SerializeField]
+        private Button play;
+
+        [SerializeField]
         private Text roomCode;
+
+        [SerializeField]
+        private Text playersCount;
 
         [SerializeField]
         private Error error;
@@ -42,6 +48,7 @@ namespace Game.Menu
 #pragma warning restore CS0649
 
         private bool loading;
+        private byte oldPlayerCount;
 
         public void JoinRoomValidate() => joinRoom.interactable = inputCode.text.Length == codeLength;
 
@@ -73,6 +80,18 @@ namespace Game.Menu
             connectPanel.SetActive(false);
             waitingPanel.SetActive(true);
             roomCode.text = "Code: " + PhotonNetwork.CurrentRoom.Name;
+
+            byte playerCount = PhotonNetwork.CurrentRoom.PlayerCount;
+            playersCount.text = $"Players: {playerCount}/{maxPlayers}";
+            oldPlayerCount = playerCount;
+
+            if (photonView.IsMine)
+            {
+                play.gameObject.SetActive(true);
+                play.interactable = playerCount >= minPlayers;
+            }
+            else
+                play.gameObject.SetActive(false);
         }
 
         public override void OnJoinRandomFailed(short returnCode, string message) => CreateRoom();
@@ -94,15 +113,27 @@ namespace Game.Menu
         {
             if (!PhotonNetwork.InRoom || loading)
                 return;
-            if (photonView.IsMine && PhotonNetwork.CurrentRoom.PlayerCount >= minPlayers)
+
+            byte playerCount = PhotonNetwork.CurrentRoom.PlayerCount;
+
+            if (oldPlayerCount != playerCount)
             {
-                loading = true;
-                PhotonNetwork.CurrentRoom.IsOpen = false;
-                photonView.RPC(nameof(Play), RpcTarget.All);
+                oldPlayerCount = playerCount;
+                playersCount.text = $"Players: {playerCount}/{maxPlayers}";
+
+                if (photonView.IsMine)
+                    play.interactable = playerCount >= minPlayers;
             }
         }
 
+        public void Play()
+        {
+            loading = true;
+            PhotonNetwork.CurrentRoom.IsOpen = false;
+            photonView.RPC(nameof(LoadLevel), RpcTarget.All);
+        }
+
         [PunRPC]
-        private void Play() => PhotonNetwork.LoadLevel(playScene);
+        private void LoadLevel() => PhotonNetwork.LoadLevel(playScene);
     }
 }
