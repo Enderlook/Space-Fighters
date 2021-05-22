@@ -1,4 +1,6 @@
-﻿using Photon.Pun;
+﻿using Game.Level;
+
+using Photon.Pun;
 
 using UnityEngine;
 
@@ -14,7 +16,10 @@ namespace Game.Player
                 return;
 
             if (collision.TryGetComponent(out PlayerBody player))
+            {
+                PlayerScore.IncreaseCounter(photonView.Owner);
                 player.Die();
+            }
 
             PhotonNetwork.Destroy(gameObject);
         }

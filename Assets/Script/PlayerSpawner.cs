@@ -6,8 +6,8 @@ using UnityEngine;
 
 namespace Game.Level
 {
-    [RequireComponent(typeof(PhotonView))]
-    public sealed class GameManager : MonoBehaviourPun
+    [DisallowMultipleComponent, RequireComponent(typeof(PhotonView))]
+    public sealed class PlayerSpawner : MonoBehaviourPun
     {
 #pragma warning disable CS0649
         [SerializeField]

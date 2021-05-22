@@ -3,7 +3,12 @@
 using Photon.Pun;
 using Photon.Realtime;
 
+using System;
+
 using UnityEngine;
+using UnityEngine.UI;
+
+using Random = UnityEngine.Random;
 
 namespace Game.Menu
 {
@@ -23,11 +28,26 @@ namespace Game.Menu
         private GameObject loadingPanel;
 
         [SerializeField]
+        private InputField playerName;
+
+        [SerializeField]
         private Error error;
 #pragma warning restore CS0649
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Used by Unity.")]
-        private void Awake() => AudioController.PlayLoop(backgroundMusic, Vector3.zero);
+        private void Awake()
+        {
+            playerName.text = PhotonNetwork.LocalPlayer.NickName = GeneratePlayerName();
+            AudioController.PlayLoop(backgroundMusic, Vector3.zero);
+        }
+
+        public void SetPlayerName()
+        {
+            string playerName = this.playerName.text;
+            PhotonNetwork.LocalPlayer.NickName = string.IsNullOrEmpty(playerName) ? GeneratePlayerName() : playerName;
+        }
+
+        private static string GeneratePlayerName() => $"Player{Random.Range(0, 9999)}";
 
         public void Connect()
         {

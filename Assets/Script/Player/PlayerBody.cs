@@ -1,22 +1,17 @@
 ﻿using Enderlook.Unity.AudioManager;
 
+using Game.Level;
+
 using Photon.Pun;
 
 using UnityEngine;
 
 namespace Game.Player
 {
-    [DisallowMultipleComponent, RequireComponent(typeof(Rigidbody2D), typeof(PhotonView))]
+    [DisallowMultipleComponent, RequireComponent(typeof(Rigidbody2D), typeof(PhotonView)), DefaultExecutionOrder(2)]
     public sealed class PlayerBody : MonoBehaviourPun
     {
 #pragma warning disable CS0649
-        [Header("Colors")]
-        [SerializeField, Tooltip("Color of enemy ships.")]
-        private Color enemyColor = Color.red;
-
-        [SerializeField, Tooltip("Color of player ship.")]
-        private Color playerColor = Color.white;
-
         [Header("Invulnerability")]
         [SerializeField, Tooltip("Amount of seconds invulnerability last.")]
         private float invulnerabilityDuration = 2;
@@ -50,10 +45,8 @@ namespace Game.Player
             renderer = GetComponent<SpriteRenderer>();
             collider = GetComponent<Collider2D>();
             animator = GetComponent<Animator>();
-
-            renderer.color = photonView.IsMine ? playerColor : enemyColor;
-
             BecomeInvulnerable();
+            renderer.color = PlayerScore.GetShipColor(photonView.Owner);
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Used by Unity.")]
@@ -66,7 +59,7 @@ namespace Game.Player
 
                 becomeVulnerableAt = 0;
                 collider.enabled = true;
-                renderer.color = photonView.IsMine ? playerColor : enemyColor;
+                renderer.color = PlayerScore.GetShipColor(photonView.Owner);
             }
         }
 

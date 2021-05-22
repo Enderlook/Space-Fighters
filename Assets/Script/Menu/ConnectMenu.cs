@@ -1,10 +1,10 @@
 ﻿using Photon.Pun;
 using Photon.Realtime;
 
-using System;
-
 using UnityEngine;
 using UnityEngine.UI;
+
+using Random = UnityEngine.Random;
 
 namespace Game.Menu
 {
@@ -70,8 +70,16 @@ namespace Game.Menu
         {
             connectPanel.SetActive(false);
             loadingPanel.SetActive(true);
-            string room = Guid.NewGuid().ToString().Substring(0, codeLength).ToLower(); // Don't pass null beacuse random rooms has very large names
-            PhotonNetwork.CreateRoom(room, new RoomOptions() { MaxPlayers = maxPlayers });
+            PhotonNetwork.CreateRoom(GenerateRoomName(), new RoomOptions() { MaxPlayers = maxPlayers });
+        }
+
+        private string GenerateRoomName()
+        {
+            const string text = "abcdefghijklmnopqrstuvwxyz0123456789";
+            char[] chars = new char[codeLength];
+            for (int i = 0; i < codeLength; i++)
+                chars[i] = text[Random.Range(0, text.Length)];
+            return new string(chars);
         }
 
         public override void OnJoinedRoom()
@@ -92,6 +100,17 @@ namespace Game.Menu
             }
             else
                 play.gameObject.SetActive(false);
+
+            if (playerCount > 1)
+            {
+                int copy = 1;
+                string originalName = PhotonNetwork.LocalPlayer.NickName;
+                foreach (Photon.Realtime.Player player in PhotonNetwork.PlayerListOthers)
+                {
+                    if (PhotonNetwork.LocalPlayer.NickName == player.NickName)
+                        PhotonNetwork.LocalPlayer.NickName = $"{originalName}{copy++}";
+                }
+            }
         }
 
         public override void OnJoinRandomFailed(short returnCode, string message) => CreateRoom();
@@ -108,6 +127,7 @@ namespace Game.Menu
             waitingPanel.SetActive(false);
             connectPanel.SetActive(true);
         }
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Used by Unity.")]
         private void Update()
         {
