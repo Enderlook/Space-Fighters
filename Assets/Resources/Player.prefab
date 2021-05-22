@@ -1,5 +1,35 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &2970193769733348282
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 893431024562968846}
+  m_Layer: 8
+  m_Name: GameObject
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &893431024562968846
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2970193769733348282}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 1, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 4305191806593427149}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4305191806593427148
 GameObject:
   m_ObjectHideFlags: 0
@@ -14,7 +44,9 @@ GameObject:
   - component: {fileID: 4305191806593427158}
   - component: {fileID: 2482406529046191674}
   - component: {fileID: 4305191806593427145}
+  - component: {fileID: 7697383196466160092}
   - component: {fileID: 4305191806593427144}
+  - component: {fileID: 1098691226366647139}
   - component: {fileID: 4305191806593427147}
   - component: {fileID: 4305191806593427156}
   - component: {fileID: 6833172041984844491}
@@ -35,7 +67,8 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
+  m_Children:
+  - {fileID: 893431024562968846}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -139,7 +172,7 @@ PolygonCollider2D:
   m_Enabled: 1
   m_Density: 1
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
@@ -204,6 +237,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 82db4be89290d8e43816709984029fad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &7697383196466160092
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4305191806593427148}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e3695a80ed835b64eb164f94d8ea5edc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  enemyColor: {r: 1, g: 0.7, b: 0.7, a: 1}
+  playerColor: {r: 1, g: 1, b: 1, a: 1}
+  invulnerabilityDuration: 2
+  invulnerabilityTone: 0.8
+  dieTrigger: Die
 --- !u!114 &4305191806593427144
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -216,10 +266,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 63b9cd473d19eb04781bac57ba9a4933, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  enemyColor: {r: 1, g: 0, b: 0, a: 1}
-  playerColor: {r: 1, g: 1, b: 1, a: 1}
-  invulnerabilityDuration: 2
-  invulnerabilityTone: 0.8
   accelerationSpeed: 20
   maximumSpeed: 5
   brakeStrength: 4
@@ -227,7 +273,23 @@ MonoBehaviour:
   idleTrigger: Idle
   accelerateTrigger: Accelerate
   brakeTrigger: Brake
-  dieTrigger: Die
+--- !u!114 &1098691226366647139
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4305191806593427148}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 224da40d60f9ad8498a850c0e1e055f2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  projectile: Bullet
+  force: 5
+  shootCooldown: 0.35
+  shootKey: 113
+  shootPoint: {fileID: 893431024562968846}
 --- !u!114 &4305191806593427147
 MonoBehaviour:
   m_ObjectHideFlags: 0
