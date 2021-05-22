@@ -9,26 +9,26 @@ namespace Game.Player
     {
 #pragma warning disable CS0649
         [Header("Movement")]
-        [SerializeField]
+        [SerializeField, Tooltip("Acceleration when moving.")]
         private float accelerationSpeed;
 
-        [SerializeField]
+        [SerializeField, Tooltip("Maximum movement speed.")]
         private float maximumSpeed;
 
-        [SerializeField]
+        [SerializeField, Tooltip("Desacceleration when braking.")]
         private float brakeStrength;
 
-        [SerializeField]
+        [SerializeField, Tooltip("Speed when rotating.")]
         private float rotationSpeed;
 
         [Header("Animations")]
-        [SerializeField]
+        [SerializeField, Tooltip("Name of idle animation trigger.")]
         private string idleTrigger;
 
-        [SerializeField]
+        [SerializeField, Tooltip("Name of accelerate animation trigger.")]
         private string accelerateTrigger;
 
-        [SerializeField]
+        [SerializeField, Tooltip("Name of brake animation trigger.")]
         private string brakeTrigger;
 #pragma warning restore CS0649
 

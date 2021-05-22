@@ -1,4 +1,6 @@
-﻿using Photon.Pun;
+﻿using Enderlook.Unity.AudioManager;
+
+using Photon.Pun;
 
 using UnityEngine;
 
@@ -22,9 +24,12 @@ namespace Game.Player
         [SerializeField, Range(0, 1), Tooltip("Color multiplier of ship when invulnerable.")]
         private float invulnerabilityTone = .8f;
 
-        [Header("Animations")]
+        [Header("Die")]
         [SerializeField, Tooltip("Name of die animation trigger.")]
         private string dieTrigger;
+
+        [SerializeField, Tooltip("Sound played when die.")]
+        private AudioUnit dieSound;
 #pragma warning restore CS0649
 
 #pragma warning disable CS0108
@@ -74,6 +79,7 @@ namespace Game.Player
             animator.SetTrigger(dieTrigger);
             collider.enabled = false;
             becomeVulnerableAt = -1;
+            AudioController.PlayOneShoot(dieSound, rigidbody.position);
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Used by Unity.")]
