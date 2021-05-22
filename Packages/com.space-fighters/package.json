@@ -6,6 +6,6 @@
   "keywords": [
   ],
   "dependencies": {
-    "com.enderlook.unity.audio_manager": "https://github.com/Enderlook/Unity-Audio-Manager.git?path=Packages/com.enderlook.unity.audio_manager#com.enderlook.unity.audio_manager/v0.2.0"
+    "com.enderlook.unity.audio_manager": "https://github.com/Enderlook/Unity-Audio-Manager.git?path=Packages/com.enderlook.unity.audio_manager#com.enderlook.unity.audio_manager/v0.3.0"
   }
 }
