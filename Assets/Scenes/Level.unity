@@ -271,7 +271,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 'The winner is:'
+  m_Text: 
 --- !u!222 &506198746
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -686,6 +686,7 @@ MonoBehaviour:
   playerPrefab: {fileID: 81071942755308158, guid: 4e85a6233b62d1947a3da0243a3406ea,
     type: 3}
   finalizePanel: {fileID: 1782171392}
+  winnerTitle: {fileID: 506198745}
   winner: {fileID: 1056526978}
   scoreboard: {fileID: 693579950}
   winScore: 10

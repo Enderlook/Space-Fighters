@@ -25,6 +25,9 @@ namespace Game.Level
         [SerializeField, Tooltip("Screen shown on finalized game.")]
         private GameObject finalizePanel;
 
+        [SerializeField, Tooltip("Title of the winner.")]
+        private Text winnerTitle;
+
         [SerializeField, Tooltip("Name of the winner.")]
         private Text winner;
 
@@ -35,7 +38,8 @@ namespace Game.Level
         private int winScore;
 #pragma warning restore CS0649
 
-        private Dictionary<Photon.Realtime.Player, (Color color, int kills)> players = new Dictionary<Photon.Realtime.Player, (Color color, int kills)>();
+        private int order;
+        private Dictionary<Photon.Realtime.Player, (Color color, int kills, int order)> players = new Dictionary<Photon.Realtime.Player, (Color color, int kills, int order)>();
 
         private static PlayerScore instance;
         private static PlayerScore Instance {
@@ -45,7 +49,7 @@ namespace Game.Level
                     instance = FindObjectOfType<PlayerScore>();
                     int i = 0;
                     foreach (Photon.Realtime.Player player in PhotonNetwork.PlayerList)
-                        instance.players.Add(player, (GetPlayerColor(i++), 0));
+                        instance.players.Add(player, (GetPlayerColor(i++), 0, 0));
                     instance.UpdateValues();
                 }
                 return instance;
@@ -64,11 +68,11 @@ namespace Game.Level
         {
             Photon.Realtime.Player[] remainingPlayers = PhotonNetwork.PlayerList;
             if (PhotonNetwork.CurrentRoom.PlayerCount < ConnectMenu.minPlayers)
-                Finalize(players
-                    .Where(e => remainingPlayers.Contains(e.Key))
-                    .OrderByDescending(e => e.Value.kills)
-                    .ThenByDescending(e => e.Key.NickName)
-                    .First().Key);
+                Finalize(Sort(players.Where(e => remainingPlayers.Contains(e.Key)))
+                    .GroupBy(e => e.kills)
+                    .OrderByDescending(e => e.Key)
+                    .First()
+                    .Select(e => e.player));
         }
 
         public static Color GetShipColor(Photon.Realtime.Player owner)
@@ -84,24 +88,24 @@ namespace Game.Level
         [PunRPC]
         private void RPC_IncreaseCounter(Photon.Realtime.Player player)
         {
-            (Color color, int kills) info = players[player];
+            (Color color, int kills, int) info = players[player];
             int kills = info.kills + 1;
-            players[player] = (info.color, kills);
+            players[player] = (info.color, kills, ++order);
             UpdateValues();
 
             if (kills == winScore)
-                Finalize(player);
+                Finalize(new Photon.Realtime.Player[] { player });
         }
 
-        private void Finalize(Photon.Realtime.Player player)
+        private void Finalize(IEnumerable<Photon.Realtime.Player> player)
         {
             HasFinalized = true;
             finalizePanel.SetActive(true);
-            winner.text = player.NickName;
-            scoreboard.text = string.Join("\n", players
-                .OrderByDescending(e => e.Value.kills)
-                .ThenByDescending(e => e.Key.NickName)
-                .Select(e => $"{e.Key.NickName} ({e.Value.kills})"));
+            string[] winners = player.Select(e => e.NickName).ToArray();
+            Debug.Assert(winners.Length != 0);
+            winner.text = string.Join(", ", winners);
+            winnerTitle.text = winners.Length == 1 ? "The winner is" : "The winners are:";
+            scoreboard.text = string.Join("\n", Sort(players).Select(e => $"{e.player.NickName} ({e.kills})"));
         }
 
         private void UpdateValues()
@@ -109,14 +113,20 @@ namespace Game.Level
             for (int i = playersHolder.childCount - 1; i >= 0; i--)
                 Destroy(playersHolder.GetChild(i).gameObject);
 
-            foreach (KeyValuePair<Photon.Realtime.Player, (Color color, int kills)> kvp in players
-                .OrderByDescending(e => e.Value.kills)
-                .ThenByDescending(e => e.Key.NickName))
+            foreach ((Photon.Realtime.Player player, Color color, int kills) in Sort(players))
             {
                 Text text = Instantiate(playerPrefab, playersHolder);
-                text.text = $"{kvp.Key.NickName} ({kvp.Value.kills})";
-                text.color = kvp.Value.color;
+                text.text = $"{player.NickName} ({kills})";
+                text.color = color;
             }
+        }
+
+        private static IEnumerable<(Photon.Realtime.Player player, Color color, int kills)> Sort(IEnumerable<KeyValuePair<Photon.Realtime.Player, (Color color, int kills, int order)>> players)
+        {
+            return players.OrderByDescending(e => e.Value.kills)
+                .ThenByDescending(e => e.Value.order)
+                .ThenByDescending(e => e.Key.NickName)
+                .Select(e => (e.Key, e.Value.color, e.Value.kills));
         }
 
         private static Color GetPlayerColor(int index)
