@@ -12,7 +12,7 @@ namespace Game.Menu
     public sealed class ConnectMenu : MonoBehaviourPunCallbacks
     {
         private const int maxPlayers = 4;
-        private const int minPlayers = 2;
+        public const int minPlayers = 2;
         private const int codeLength = 6;
 
 #pragma warning disable CS0649

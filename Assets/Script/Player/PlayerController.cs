@@ -1,4 +1,6 @@
-﻿using Photon.Pun;
+﻿using Game.Level;
+
+using Photon.Pun;
 
 using UnityEngine;
 
@@ -49,7 +51,7 @@ namespace Game.Player
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Used by Unity.")]
         private void FixedUpdate()
         {
-            if (!body.IsAlive)
+            if (!body.IsAlive || PlayerScore.HasFinalized)
                 return;
 
             if (photonView.IsMine)

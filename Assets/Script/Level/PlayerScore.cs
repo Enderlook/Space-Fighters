@@ -1,5 +1,7 @@
 ﻿using Enderlook.Unity.Utils;
 
+using Game.Menu;
+
 using Photon.Pun;
 
 using System.Collections.Generic;
@@ -11,7 +13,7 @@ using UnityEngine.UI;
 namespace Game.Level
 {
     [DisallowMultipleComponent, RequireComponent(typeof(PhotonView)), DefaultExecutionOrder(1)]
-    public sealed class PlayerScore : MonoBehaviourPun
+    public sealed class PlayerScore : MonoBehaviourPunCallbacks
     {
 #pragma warning disable CS0649
         [SerializeField, Tooltip("Holder of all players.")]
@@ -19,6 +21,18 @@ namespace Game.Level
 
         [SerializeField, Tooltip("Prefab of player name in UI.")]
         private Text playerPrefab;
+
+        [SerializeField, Tooltip("Screen shown on finalized game.")]
+        private GameObject finalizePanel;
+
+        [SerializeField, Tooltip("Name of the winner.")]
+        private Text winner;
+
+        [SerializeField, Tooltip("Scoreboard of players.")]
+        private Text scoreboard;
+
+        [SerializeField, Tooltip("Required score to win.")]
+        private int winScore;
 #pragma warning restore CS0649
 
         private Dictionary<Photon.Realtime.Player, (Color color, int kills)> players = new Dictionary<Photon.Realtime.Player, (Color color, int kills)>();
@@ -38,10 +52,23 @@ namespace Game.Level
             }
         }
 
+        public static bool HasFinalized { get; internal set; }
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Used by Unity.")]
         private void Awake()
         {
             PlayerScore _ = Instance;
+        }
+
+        public override void OnPlayerLeftRoom(Photon.Realtime.Player otherPlayer)
+        {
+            Photon.Realtime.Player[] remainingPlayers = PhotonNetwork.PlayerList;
+            if (PhotonNetwork.CurrentRoom.PlayerCount < ConnectMenu.minPlayers)
+                Finalize(players
+                    .Where(e => remainingPlayers.Contains(e.Key))
+                    .OrderByDescending(e => e.Value.kills)
+                    .ThenByDescending(e => e.Key.NickName)
+                    .First().Key);
         }
 
         public static Color GetShipColor(Photon.Realtime.Player owner)
@@ -58,8 +85,23 @@ namespace Game.Level
         private void RPC_IncreaseCounter(Photon.Realtime.Player player)
         {
             (Color color, int kills) info = players[player];
-            players[player] = (info.color, info.kills + 1);
+            int kills = info.kills + 1;
+            players[player] = (info.color, kills);
             UpdateValues();
+
+            if (kills == winScore)
+                Finalize(player);
+        }
+
+        private void Finalize(Photon.Realtime.Player player)
+        {
+            HasFinalized = true;
+            finalizePanel.SetActive(true);
+            winner.text = player.NickName;
+            scoreboard.text = string.Join("\n", players
+                .OrderByDescending(e => e.Value.kills)
+                .ThenByDescending(e => e.Key.NickName)
+                .Select(e => $"{e.Key.NickName} ({e.Value.kills})"));
         }
 
         private void UpdateValues()
