@@ -52,8 +52,18 @@ namespace Game.Menu
         public void Connect()
         {
             menuPanel.SetActive(false);
-            loadingPanel.SetActive(true);
-            PhotonNetwork.ConnectUsingSettings();
+            if (!PhotonNetwork.IsConnected)
+            {
+                loadingPanel.SetActive(true);
+                PhotonNetwork.ConnectUsingSettings();
+            }
+            else if (!PhotonNetwork.InLobby)
+            {
+                loadingPanel.SetActive(true);
+                PhotonNetwork.JoinLobby();
+            }
+            else
+                connectPanel.SetActive(true);
         }
 
         public void Open() => gameObject.SetActive(true);
@@ -64,6 +74,9 @@ namespace Game.Menu
 
         public override void OnJoinedLobby()
         {
+            if (menuPanel.activeInHierarchy) // Prevent opening panel when returning from a match.
+                return;
+
             loadingPanel.SetActive(false);
             connectPanel.SetActive(true);
         }
