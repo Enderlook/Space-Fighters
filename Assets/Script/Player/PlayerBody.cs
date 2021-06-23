@@ -36,7 +36,9 @@ namespace Game.Player
 
         private float becomeVulnerableAt;
 
-        public bool IsAlive => becomeVulnerableAt != -1;
+        private bool IsAlive => becomeVulnerableAt != -1;
+
+        public bool IsPlayerInputAllowed => this.IsOwnerPlayer() && IsAlive && !PlayerScore.HasFinalized;
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Used by Unity.")]
         private void Awake()
@@ -45,8 +47,8 @@ namespace Game.Player
             renderer = GetComponent<SpriteRenderer>();
             collider = GetComponent<Collider2D>();
             animator = GetComponent<Animator>();
+            SetPlayerColor();
             BecomeInvulnerable();
-            renderer.color = PlayerScore.GetShipColor(photonView.Owner);
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Used by Unity.")]
@@ -59,11 +61,11 @@ namespace Game.Player
 
                 becomeVulnerableAt = 0;
                 collider.enabled = true;
-                renderer.color = PlayerScore.GetShipColor(photonView.Owner);
+                SetPlayerColor();
             }
         }
 
-        public void Die() => photonView.RPC(nameof(RPC_Die), RpcTarget.All);
+        public void Die() => this.RPC_FromServer(() => RPC_Die());
 
         [PunRPC]
         private void RPC_Die()
@@ -78,8 +80,8 @@ namespace Game.Player
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Used by Unity.")]
         private void FromDie()
         {
-            if (photonView.IsMine)
-                photonView.RPC(nameof(RPC_FromDie), RpcTarget.All);
+            if (Server.IsServer)
+                this.RPC_FromServer(() => RPC_FromDie());
         }
 
         [PunRPC]
@@ -96,5 +98,7 @@ namespace Game.Player
             becomeVulnerableAt = Time.time + invulnerabilityDuration;
             renderer.color *= invulnerabilityTone;
         }
+
+        private void SetPlayerColor() => renderer.color = PlayerScore.GetShipColor(this.GetPlayerOwner());
     }
 }

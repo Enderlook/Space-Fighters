@@ -51,19 +51,16 @@ namespace Game.Player
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Used by Unity.")]
         private void FixedUpdate()
         {
-            if (!body.IsAlive || PlayerScore.HasFinalized)
+            if (!body.IsPlayerInputAllowed)
                 return;
 
-            if (photonView.IsMine)
-            {
-                Move();
-                Rotation();
-            }
+            this.RPC_ToServer(() => RPC_Move(Input.GetAxis("Vertical")));
+            this.RPC_ToServer(() => RPC_Rotation(Input.GetAxis("Horizontal")));
         }
 
-        private void Move()
+        [PunRPC]
+        private void RPC_Move(float acceleration)
         {
-            float acceleration = Input.GetAxis("Vertical");
             if (acceleration > 0)
             {
                 animator.SetTrigger(accelerateTrigger);
@@ -80,9 +77,9 @@ namespace Game.Player
                 animator.SetTrigger(idleTrigger);
         }
 
-        private void Rotation()
+        [PunRPC]
+        private void RPC_Rotation(float rotation)
         {
-            float rotation = Input.GetAxis("Horizontal");
             if (rotation != 0)
                 rigidbody.SetRotation(rigidbody.rotation - (rotation * rotationSpeed));
         }

@@ -1,5 +1,7 @@
 ﻿using Enderlook.Unity.AudioManager;
 
+using Game.Level;
+
 using Photon.Pun;
 
 using UnityEngine;
@@ -36,28 +38,40 @@ namespace Game.Player
 #pragma warning restore CS0108
 
         private float nextShootAt;
+        private PlayerBody body;
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Used by Unity.")]
-        private void Awake() => rigidbody = GetComponent<Rigidbody2D>();
+        private void Awake()
+        {
+            rigidbody = GetComponent<Rigidbody2D>();
+            body = GetComponent<PlayerBody>();
+        }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Used by Unity.")]
         private void FixedUpdate()
         {
-            if (!photonView.IsMine)
+            if (!body.IsPlayerInputAllowed)
                 return;
 
-            if (Time.fixedTime >= nextShootAt && Input.GetKey(shootKey))
+            if (Input.GetKey(shootKey))
+                this.RPC_ToServer(() => RPC_Shoot());
+        }
+
+        [PunRPC]
+        private void RPC_Shoot()
+        {
+            if (Time.fixedTime >= nextShootAt)
             {
                 nextShootAt = Time.fixedTime + shootCooldown;
-                GameObject instance = PhotonNetwork.Instantiate(projectile, shootPoint.position, shootPoint.rotation);
+                GameObject instance = Server.InstantiatePrefab(projectile, this.GetPlayerOwner(), shootPoint.position, shootPoint.rotation);
                 Rigidbody2D instanceRigidbody = instance.GetComponent<Rigidbody2D>();
                 instanceRigidbody.velocity = rigidbody.velocity;
                 instanceRigidbody.AddForce(shootPoint.up * force, ForceMode2D.Impulse);
-                photonView.RPC(nameof(PlayShootSound), RpcTarget.All);
+                photonView.RPC(nameof(RPC_PlayShootSound), RpcTarget.All);
             }
         }
 
         [PunRPC]
-        private void PlayShootSound() => AudioController.PlayOneShoot(shootSound, rigidbody.position);
+        private void RPC_PlayShootSound() => AudioController.PlayOneShoot(shootSound, rigidbody.position);
     }
 }
