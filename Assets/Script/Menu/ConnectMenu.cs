@@ -11,8 +11,8 @@ namespace Game.Menu
     [DisallowMultipleComponent, RequireComponent(typeof(PhotonView))]
     public sealed class ConnectMenu : MonoBehaviourPunCallbacks
     {
-        private const int maxPlayers = 4;
-        public const int minPlayers = 2;
+        private const int maxPlayers = 6;
+        public const int minPlayers = 4;
         private const int codeLength = 6;
 
 #pragma warning disable CS0649
