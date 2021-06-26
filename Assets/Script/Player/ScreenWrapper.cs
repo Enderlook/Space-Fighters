@@ -36,7 +36,7 @@ namespace Game.Player
                 return;
             }
 
-            // Prevent objects from getting stuck out of the screen
+            // Prevent objects from getting stuck out of the screen.
             rigidbody.velocity = (rigidbody.velocity * (1 - (Time.fixedDeltaTime * .3f))) - (rigidbody.position.normalized * Time.fixedDeltaTime);
 
             if (isWrappingX && isWrappingY)
