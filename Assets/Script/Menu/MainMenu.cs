@@ -32,6 +32,8 @@ namespace Game.Menu
         private Error error;
 #pragma warning restore CS0649
 
+        private bool isExiting;
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Used by Unity.")]
         private void Awake()
         {
@@ -68,7 +70,13 @@ namespace Game.Menu
 
         public override void OnConnectedToMaster() => PhotonNetwork.JoinLobby();
 
-        public override void OnDisconnected(DisconnectCause cause) => error.Show("Error: " + cause.ToString(), () => menuPanel.SetActive(true));
+        public override void OnDisconnected(DisconnectCause cause)
+        {
+            if (cause == DisconnectCause.DisconnectByClientLogic)
+                Application.Quit();
+            else
+                error.Show("Error: " + cause.ToString(), () => menuPanel.SetActive(true));
+        }
 
         public override void OnJoinedLobby()
         {
@@ -79,6 +87,12 @@ namespace Game.Menu
             connectPanel.SetActive(true);
         }
 
-        public void Exit() => Application.Quit();
+        public void Exit()
+        {
+            if (PhotonNetwork.IsConnected)
+                PhotonNetwork.Disconnect();
+            else
+                Application.Quit();
+        }
     }
 }
