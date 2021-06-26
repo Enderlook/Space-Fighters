@@ -20,7 +20,8 @@ namespace Game.Player
 
             if (collision.TryGetComponent(out PlayerBody player))
             {
-                PlayerScore.IncreaseCounter(this.GetPlayerOwner());
+                Photon.Realtime.Player owner = this.GetPlayerOwner();
+                PlayerScore.ChangeCounter(owner, owner == player.GetPlayerOwner());
                 player.Die();
             }
 

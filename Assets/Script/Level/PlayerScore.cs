@@ -82,14 +82,14 @@ namespace Game.Level
             return color;
         }
 
-        public static void IncreaseCounter(Photon.Realtime.Player player)
-            => Instance.photonView.RPC(nameof(RPC_IncreaseCounter), RpcTarget.All, player);
+        public static void ChangeCounter(Photon.Realtime.Player player, bool decrease)
+            => Instance.RPC_FromServer(() => Instance.RPC_IncreaseCounter(player, decrease));
 
         [PunRPC]
-        private void RPC_IncreaseCounter(Photon.Realtime.Player player)
+        private void RPC_IncreaseCounter(Photon.Realtime.Player player, bool decrease)
         {
             (Color color, int kills, int) info = players[player];
-            int kills = info.kills + 1;
+            int kills = info.kills + (decrease ? -1 : 1);
             players[player] = (info.color, kills, ++order);
             UpdateValues();
 
