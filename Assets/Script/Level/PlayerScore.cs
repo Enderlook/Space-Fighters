@@ -1,4 +1,5 @@
-﻿using Enderlook.Unity.Utils;
+﻿using Enderlook.Enumerables;
+using Enderlook.Unity.Utils;
 
 using Game.Menu;
 
@@ -67,8 +68,11 @@ namespace Game.Level
         public override void OnPlayerLeftRoom(Photon.Realtime.Player otherPlayer)
         {
             Photon.Realtime.Player[] remainingPlayers = PhotonNetwork.PlayerList;
+            players = players.Where(e => remainingPlayers.Contains(e.Key)).ToDictionary();
+            UpdateValues();
+
             if (PhotonNetwork.CurrentRoom.PlayerCount < ConnectMenu.minPlayers)
-                Finalize(Sort(players.Where(e => remainingPlayers.Contains(e.Key)))
+                Finalize(Sort()
                     .GroupBy(e => e.kills)
                     .OrderByDescending(e => e.Key)
                     .First()
@@ -105,7 +109,7 @@ namespace Game.Level
             Debug.Assert(winners.Length != 0);
             winner.text = string.Join(", ", winners);
             winnerTitle.text = winners.Length == 1 ? "The winner is" : "The winners are:";
-            scoreboard.text = string.Join("\n", Sort(players).Select(e => $"{e.player.NickName} ({e.kills})"));
+            scoreboard.text = string.Join("\n", Sort().Select(e => $"{e.player.NickName} ({e.kills})"));
         }
 
         private void UpdateValues()
@@ -113,7 +117,7 @@ namespace Game.Level
             for (int i = playersHolder.childCount - 1; i >= 0; i--)
                 Destroy(playersHolder.GetChild(i).gameObject);
 
-            foreach ((Photon.Realtime.Player player, Color color, int kills) in Sort(players))
+            foreach ((Photon.Realtime.Player player, Color color, int kills) in Sort())
             {
                 Text text = Instantiate(playerPrefab, playersHolder);
                 text.text = $"{player.NickName} ({kills})";
@@ -121,9 +125,10 @@ namespace Game.Level
             }
         }
 
-        private static IEnumerable<(Photon.Realtime.Player player, Color color, int kills)> Sort(IEnumerable<KeyValuePair<Photon.Realtime.Player, (Color color, int kills, int order)>> players)
+        private IEnumerable<(Photon.Realtime.Player player, Color color, int kills)> Sort()
         {
-            return players.OrderByDescending(e => e.Value.kills)
+            return players
+                .OrderByDescending(e => e.Value.kills)
                 .ThenByDescending(e => e.Value.order)
                 .ThenByDescending(e => e.Key.NickName)
                 .Select(e => (e.Key, e.Value.color, e.Value.kills));
