@@ -1,4 +1,6 @@
-﻿using Photon.Pun;
+﻿using Game.Level;
+
+using Photon.Pun;
 using Photon.Realtime;
 
 using UnityEngine;
@@ -150,7 +152,7 @@ namespace Game.Menu
         {
             loading = true;
             PhotonNetwork.CurrentRoom.IsOpen = false;
-            photonView.RPC(nameof(LoadLevel), RpcTarget.All);
+            this.RPC(() => LoadLevel(), RpcTarget.All);
         }
 
         [PunRPC]

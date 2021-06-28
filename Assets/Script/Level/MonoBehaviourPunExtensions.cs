@@ -2,6 +2,7 @@
 
 using System;
 using System.Linq.Expressions;
+using System.Reflection;
 
 using UnityEngine;
 
@@ -24,8 +25,13 @@ namespace Game.Level
         public static void RPC_FromServer(this MonoBehaviourPun source, Expression<Action> method)
         {
             Debug.Assert(Server.IsServer);
+            source.RPC(method, RpcTarget.All);
+        }
+
+        public static void RPC(this MonoBehaviourPun source, Expression<Action> method, RpcTarget target)
+        {
             (string methodName, object[] parameters) tuple = DisarmRPC(method);
-            source.photonView.RPC(tuple.methodName, RpcTarget.All, tuple.parameters);
+            source.photonView.RPC(tuple.methodName, target, tuple.parameters);
         }
 
         private static (string methodName, object[] parameters) DisarmRPC(Expression<Action> method)
@@ -50,15 +56,33 @@ namespace Game.Level
 
         private static object Interpret(Expression expression)
         {
-            if (expression is null)
-                return null;
-            if (expression is ConstantExpression constant)
-                return constant.Value;
-            MethodCallExpression call = (MethodCallExpression)expression;
-            object[] parameters = new object[call.Arguments.Count];
-            for (int i = 0; i < parameters.Length; i++)
-                parameters[i] = Interpret(call.Arguments[i]);
-            return call.Method.Invoke(Interpret(call.Object), parameters);
+            switch (expression)
+            {
+                case null:
+                    return null;
+                case ConstantExpression constant:
+                    return constant.Value;
+                case MethodCallExpression call:
+                    object[] parameters = new object[call.Arguments.Count];
+                    for (int i = 0; i < parameters.Length; i++)
+                        parameters[i] = Interpret(call.Arguments[i]);
+                    return call.Method.Invoke(Interpret(call.Object), parameters);
+                case MemberExpression member:
+                    object self = Interpret(member.Expression);
+                    switch (member.Member)
+                    {
+                        case PropertyInfo property:
+                            return property.GetValue(self);
+                        case FieldInfo field:
+                            return field.GetValue(self);
+                        default:
+                            Debug.LogError("Invalid member type.");
+                            return null;
+                    }
+                default:
+                    Debug.LogError($"Invalid expression type {expression.GetType()}.");
+                    return null;
+            }
         }
     }
 }

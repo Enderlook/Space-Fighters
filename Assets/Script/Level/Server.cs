@@ -43,7 +43,7 @@ namespace Game.Level
 
             if (PhotonNetwork.IsMasterClient)
             {
-                photonView.RPC(nameof(RPC_SetServer), RpcTarget.AllBuffered, PhotonNetwork.LocalPlayer);
+                this.RPC(() => RPC_SetServer(PhotonNetwork.LocalPlayer), RpcTarget.AllBuffered);
 
                 objects = new Dictionary<Photon.Realtime.Player, List<WeakReference<PhotonView>>>();
                 Photon.Realtime.Player[] players = PhotonNetwork.PlayerList;
