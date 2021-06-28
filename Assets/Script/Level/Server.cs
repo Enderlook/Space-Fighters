@@ -1,9 +1,5 @@
 ﻿using Photon.Pun;
 
-using System;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-
 using UnityEngine;
 
 namespace Game.Level
@@ -27,10 +23,6 @@ namespace Game.Level
 
         public static Photon.Realtime.Player ServerPlayer => instance.server;
 
-        private Dictionary<Photon.Realtime.Player, List<WeakReference<PhotonView>>> objects;
-
-        private ConditionalWeakTable<PhotonView, Photon.Realtime.Player> owners = new ConditionalWeakTable<PhotonView, Photon.Realtime.Player>();
-
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Used by Unity.")]
         private void Awake()
         {
@@ -45,12 +37,9 @@ namespace Game.Level
             {
                 this.RPC(() => RPC_SetServer(PhotonNetwork.LocalPlayer), RpcTarget.AllBuffered);
 
-                objects = new Dictionary<Photon.Realtime.Player, List<WeakReference<PhotonView>>>();
                 Photon.Realtime.Player[] players = PhotonNetwork.PlayerList;
                 for (int i = 0; i < players.Length; i++)
                 {
-                    objects.Add(players[i], new List<WeakReference<PhotonView>>());
-
                     float x = transform.position.x + (spawnRadius * Mathf.Cos(2 * Mathf.PI * i / players.Length));
                     float y = transform.position.y + (spawnRadius * Mathf.Sin(2 * Mathf.PI * i / players.Length));
                     Vector3 position = new Vector3(x, y);
@@ -69,18 +58,18 @@ namespace Game.Level
             if (!IsServer)
                 return;
 
-            foreach (WeakReference<PhotonView> reference in objects[otherPlayer])
-                if (reference.TryGetTarget(out PhotonView photonView) && photonView != null)
+            foreach (PhotonView photonView in FindObjectsOfType<PhotonView>())
+                if (GetPlayerOwner(photonView) == otherPlayer)
                     PhotonNetwork.Destroy(photonView);
         }
 
+        public override void OnMasterClientSwitched(Photon.Realtime.Player newMasterClient) => server = newMasterClient;
+
         public static Photon.Realtime.Player GetPlayerOwner(PhotonView view)
         {
-            if (instance.owners.TryGetValue(view, out Photon.Realtime.Player owner))
-                return owner;
-            owner = (Photon.Realtime.Player)view.InstantiationData[0];
-            instance.owners.Add(view, owner);
-            return owner;
+            if (view.InstantiationData is null)
+                return view.Owner;
+            return (Photon.Realtime.Player)view.InstantiationData[0];
         }
 
         [PunRPC]
@@ -94,14 +83,6 @@ namespace Game.Level
         }
 
         public static GameObject InstantiatePrefab(string prefab, Photon.Realtime.Player owner, Vector3 position, Quaternion rotation)
-        {
-            GameObject instance = PhotonNetwork.InstantiateRoomObject(prefab, position, rotation, data: new object[] { owner });
-
-            List<WeakReference<PhotonView>> list = Server.instance.objects[owner];
-            foreach (PhotonView view in instance.GetComponentsInChildren<PhotonView>())
-                list.Add(new WeakReference<PhotonView>(view));
-
-            return instance;
-        }
+            => PhotonNetwork.InstantiateRoomObject(prefab, position, rotation, data: new object[] { owner });
     }
 }
