@@ -95,14 +95,6 @@ namespace Game.Menu
             playersCount.text = $"Players: {playerCount}/{maxPlayers}";
             oldPlayerCount = playerCount;
 
-            if (photonView.IsMine)
-            {
-                play.gameObject.SetActive(true);
-                play.interactable = playerCount >= minPlayers;
-            }
-            else
-                play.gameObject.SetActive(false);
-
             if (playerCount > 1)
             {
                 int copy = 1;
@@ -113,6 +105,8 @@ namespace Game.Menu
                         PhotonNetwork.LocalPlayer.NickName = $"{originalName}{copy++}";
                 }
             }
+
+            UpdatePlayButton();
         }
 
         public override void OnJoinRandomFailed(short returnCode, string message) => CreateRoom();
@@ -143,9 +137,19 @@ namespace Game.Menu
                 oldPlayerCount = playerCount;
                 playersCount.text = $"Players: {playerCount}/{maxPlayers}";
 
-                if (photonView.IsMine)
-                    play.interactable = playerCount >= minPlayers;
+                UpdatePlayButton();
             }
+        }
+
+        private void UpdatePlayButton()
+        {
+            if (PhotonNetwork.IsMasterClient)
+            {
+                play.gameObject.SetActive(true);
+                play.interactable = PhotonNetwork.CurrentRoom.PlayerCount >= minPlayers;
+            }
+            else
+                play.gameObject.SetActive(false);
         }
 
         public void Play()
