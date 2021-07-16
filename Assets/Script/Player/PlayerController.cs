@@ -2,6 +2,9 @@
 
 using Photon.Pun;
 
+using System;
+using System.Linq.Expressions;
+
 using UnityEngine;
 
 namespace Game.Player
@@ -40,12 +43,17 @@ namespace Game.Player
         private Animator animator;
         private PlayerBody body;
 
+        private Expression<Action> moveExpression;
+        private Expression<Action> rotateExpression;
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Used by Unity.")]
         private void Awake()
         {
             rigidbody = GetComponent<Rigidbody2D>();
             animator = GetComponent<Animator>();
             body = GetComponent<PlayerBody>();
+            moveExpression = () => RPC_Move(Input.GetAxis("Vertical"));
+            rotateExpression = () => RPC_Rotation(Input.GetAxis("Horizontal"));
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Used by Unity.")]
@@ -54,8 +62,8 @@ namespace Game.Player
             if (!body.IsPlayerInputAllowed)
                 return;
 
-            this.RPC_ToServer(() => RPC_Move(Input.GetAxis("Vertical")));
-            this.RPC_ToServer(() => RPC_Rotation(Input.GetAxis("Horizontal")));
+            this.RPC_ToServer(moveExpression);
+            this.RPC_ToServer(rotateExpression);
         }
 
         [PunRPC]

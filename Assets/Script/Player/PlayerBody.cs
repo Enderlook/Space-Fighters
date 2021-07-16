@@ -4,6 +4,9 @@ using Game.Level;
 
 using Photon.Pun;
 
+using System;
+using System.Linq.Expressions;
+
 using UnityEngine;
 
 namespace Game.Player
@@ -36,6 +39,9 @@ namespace Game.Player
 
         private float becomeVulnerableAt;
 
+        private Expression<Action> dieExpression;
+        private Expression<Action> fromDieExpression;
+
         private bool IsAlive => becomeVulnerableAt != -1;
 
         public bool IsPlayerInputAllowed => this.IsOwnerPlayer() && IsAlive && !PlayerScore.HasFinalized;
@@ -49,6 +55,8 @@ namespace Game.Player
             animator = GetComponent<Animator>();
             SetPlayerColor();
             BecomeInvulnerable();
+            dieExpression = () => RPC_Die();
+            fromDieExpression = () => RPC_FromDie();
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Used by Unity.")]
@@ -65,7 +73,7 @@ namespace Game.Player
             }
         }
 
-        public void Die() => this.RPC_FromServer(() => RPC_Die());
+        public void Die() => this.RPC_FromServer(dieExpression);
 
         [PunRPC]
         private void RPC_Die()
@@ -81,7 +89,7 @@ namespace Game.Player
         private void FromDie()
         {
             if (Server.IsServer)
-                this.RPC_FromServer(() => RPC_FromDie());
+                this.RPC_FromServer(fromDieExpression);
         }
 
         [PunRPC]

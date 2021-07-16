@@ -4,6 +4,9 @@ using Game.Level;
 
 using Photon.Pun;
 
+using System;
+using System.Linq.Expressions;
+
 using UnityEngine;
 
 namespace Game.Player
@@ -40,11 +43,14 @@ namespace Game.Player
         private float nextShootAt;
         private PlayerBody body;
 
+        private Expression<Action> shootExpression;
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Used by Unity.")]
         private void Awake()
         {
             rigidbody = GetComponent<Rigidbody2D>();
             body = GetComponent<PlayerBody>();
+            shootExpression = () => RPC_Shoot();
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Used by Unity.")]
@@ -54,7 +60,7 @@ namespace Game.Player
                 return;
 
             if (Input.GetKey(shootKey))
-                this.RPC_ToServer(() => RPC_Shoot());
+                this.RPC_ToServer(shootExpression);
         }
 
         [PunRPC]
