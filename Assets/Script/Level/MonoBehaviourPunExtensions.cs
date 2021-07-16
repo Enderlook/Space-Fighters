@@ -45,6 +45,7 @@ namespace Game.Level
             // If this get too expensive, replace this with the traditional approach `RPC(nameof(Method), new object[] { p1, p2, etc });`.
 
             MethodCallExpression body = (MethodCallExpression)method.Body;
+            Debug.Assert(body.Method.IsDefined(typeof(PunRPC)));
             object[] parameters = GetArray(body.Arguments.Count);
             if (Application.platform == RuntimePlatform.WebGLPlayer)
             {
