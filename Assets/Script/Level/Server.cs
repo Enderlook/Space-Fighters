@@ -40,9 +40,8 @@ namespace Game.Level
                 Photon.Realtime.Player[] players = PhotonNetwork.PlayerList;
                 for (int i = 0; i < players.Length; i++)
                 {
-                    float x = transform.position.x + (spawnRadius * Mathf.Cos(2 * Mathf.PI * i / players.Length));
-                    float y = transform.position.y + (spawnRadius * Mathf.Sin(2 * Mathf.PI * i / players.Length));
-                    Vector3 position = new Vector3(x, y);
+                    float j = 2 * Mathf.PI * i / players.Length;
+                    Vector3 position = (Vector2)transform.position + new Vector2(Mathf.Cos(j), Mathf.Sin(j)) * spawnRadius;
 
                     Vector3 direction = (Vector3.zero - position).normalized;
                     float z = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
