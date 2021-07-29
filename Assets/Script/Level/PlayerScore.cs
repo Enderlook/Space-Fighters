@@ -68,7 +68,7 @@ namespace Game.Level
             players = players.Where(e => remainingPlayers.Contains(e.Key)).ToDictionary();
             UpdateValues();
 
-            if (Server.ClientsCount < ConnectMenu.MinimumClients)
+            if (Server.ClientsCount < ConnectMenu.MinimumClientsToPlay)
                 Finalize(Sort()
                     .GroupBy(e => e.kills)
                     .OrderByDescending(e => e.Key)

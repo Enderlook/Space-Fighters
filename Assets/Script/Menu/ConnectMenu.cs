@@ -14,7 +14,8 @@ namespace Game.Menu
     public sealed class ConnectMenu : MonoBehaviourPunCallbacks
     {
         private const int MaximumClients = 6;
-        public const int MinimumClients = 4;
+        public const int MinimumClientsToStart = 4;
+        public const int MinimumClientsToPlay = 2;
         private const int codeLength = 6;
 
         private const int MaximumPlayers = Server.IsFullAuth ? MaximumClients + 1 : MaximumClients;
@@ -148,7 +149,7 @@ namespace Game.Menu
             if (PhotonNetwork.IsMasterClient)
             {
                 play.gameObject.SetActive(true);
-                play.interactable = Server.ClientsCount >= MinimumClients;
+                play.interactable = Server.ClientsCount >= MinimumClientsToStart;
             }
             else
                 play.gameObject.SetActive(false);
