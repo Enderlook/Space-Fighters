@@ -13,9 +13,11 @@ namespace Game.Menu
     [DisallowMultipleComponent, RequireComponent(typeof(PhotonView))]
     public sealed class ConnectMenu : MonoBehaviourPunCallbacks
     {
-        private const int maxPlayers = 6;
-        public const int minPlayers = 4;
+        private const int MaximumClients = 6;
+        public const int MinimumClients = 4;
         private const int codeLength = 6;
+
+        private const int MaximumPlayers = Server.IsFullAuth ? MaximumClients + 1 : MaximumClients;
 
 #pragma warning disable CS0649
         [SerializeField]
@@ -65,14 +67,14 @@ namespace Game.Menu
         {
             connectPanel.SetActive(false);
             loadingPanel.SetActive(true);
-            PhotonNetwork.JoinRandomRoom(null, maxPlayers);
+            PhotonNetwork.JoinRandomRoom(null, MaximumPlayers);
         }
 
         public void CreateRoom()
         {
             connectPanel.SetActive(false);
             loadingPanel.SetActive(true);
-            PhotonNetwork.CreateRoom(GenerateRoomName(), new RoomOptions() { MaxPlayers = maxPlayers });
+            PhotonNetwork.CreateRoom(GenerateRoomName(), new RoomOptions() { MaxPlayers = MaximumPlayers });
         }
 
         private string GenerateRoomName()
@@ -91,8 +93,8 @@ namespace Game.Menu
             waitingPanel.SetActive(true);
             roomCode.text = "Code: " + PhotonNetwork.CurrentRoom.Name;
 
-            byte playerCount = PhotonNetwork.CurrentRoom.PlayerCount;
-            playersCount.text = $"Players: {playerCount}/{maxPlayers}";
+            byte playerCount = Server.ClientsCount;
+            playersCount.text = $"Players: {playerCount}/{MaximumClients}";
             oldPlayerCount = playerCount;
 
             if (playerCount > 1)
@@ -130,12 +132,12 @@ namespace Game.Menu
             if (!PhotonNetwork.InRoom || loading)
                 return;
 
-            byte playerCount = PhotonNetwork.CurrentRoom.PlayerCount;
+            byte playerCount = Server.ClientsCount;
 
             if (oldPlayerCount != playerCount)
             {
                 oldPlayerCount = playerCount;
-                playersCount.text = $"Players: {playerCount}/{maxPlayers}";
+                playersCount.text = $"Players: {playerCount}/{MaximumClients}";
 
                 UpdatePlayButton();
             }
@@ -146,7 +148,7 @@ namespace Game.Menu
             if (PhotonNetwork.IsMasterClient)
             {
                 play.gameObject.SetActive(true);
-                play.interactable = PhotonNetwork.CurrentRoom.PlayerCount >= minPlayers;
+                play.interactable = Server.ClientsCount >= MinimumClients;
             }
             else
                 play.gameObject.SetActive(false);

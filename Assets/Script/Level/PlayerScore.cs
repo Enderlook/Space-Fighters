@@ -13,7 +13,7 @@ using UnityEngine.UI;
 
 namespace Game.Level
 {
-    [DisallowMultipleComponent, RequireComponent(typeof(PhotonView)), DefaultExecutionOrder(1)]
+    [DisallowMultipleComponent, RequireComponent(typeof(PhotonView))]
     public sealed class PlayerScore : MonoBehaviourPunCallbacks
     {
 #pragma warning disable CS0649
@@ -49,7 +49,7 @@ namespace Game.Level
                 {
                     instance = FindObjectOfType<PlayerScore>();
                     int i = 0;
-                    foreach (Photon.Realtime.Player player in PhotonNetwork.PlayerList)
+                    foreach (Photon.Realtime.Player player in Server.Clients)
                         instance.players.Add(player, (GetPlayerColor(i++), 0, 0));
                     instance.UpdateValues();
                 }
@@ -60,18 +60,15 @@ namespace Game.Level
         public static bool HasFinalized { get; internal set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Used by Unity.")]
-        private void Awake()
-        {
-            PlayerScore _ = Instance;
-        }
+        private void Awake() => Server.AfterServerIsConnected(() => { PlayerScore _ = Instance; });
 
         public override void OnPlayerLeftRoom(Photon.Realtime.Player otherPlayer)
         {
-            Photon.Realtime.Player[] remainingPlayers = PhotonNetwork.PlayerList;
+            Photon.Realtime.Player[] remainingPlayers = Server.Clients;
             players = players.Where(e => remainingPlayers.Contains(e.Key)).ToDictionary();
             UpdateValues();
 
-            if (PhotonNetwork.CurrentRoom.PlayerCount < ConnectMenu.minPlayers)
+            if (Server.ClientsCount < ConnectMenu.MinimumClients)
                 Finalize(Sort()
                     .GroupBy(e => e.kills)
                     .OrderByDescending(e => e.Key)

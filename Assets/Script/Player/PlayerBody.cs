@@ -53,10 +53,13 @@ namespace Game.Player
             renderer = GetComponent<SpriteRenderer>();
             collider = GetComponent<Collider2D>();
             animator = GetComponent<Animator>();
-            SetPlayerColor();
-            BecomeInvulnerable();
             dieExpression = () => RPC_Die();
             fromDieExpression = () => RPC_FromDie();
+            Server.AfterServerIsConnected(() =>
+            {
+                SetPlayerColor();
+                BecomeInvulnerable();
+            });
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Used by Unity.")]
