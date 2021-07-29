@@ -63,16 +63,37 @@ namespace Game.Level
                 Photon.Realtime.Player[] players = Clients;
                 for (int i = 0; i < players.Length; i++)
                 {
-                    float j = 2 * Mathf.PI * i / players.Length;
-                    Vector3 position = (Vector2)transform.position + new Vector2(Mathf.Cos(j), Mathf.Sin(j)) * spawnRadius;
-
-                    Vector3 direction = (Vector3.zero - position).normalized;
-                    float z = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
-                    Quaternion rotation = Quaternion.Euler(0, 0, z - 90);
-
-                    InstantiatePrefab(playerPrefab, players[i], position, rotation);
+                    players[i].TagObject = i;
+                    (Vector2 position, float rotation) tuple = GetSpawnPosition(i, players.Length);
+                    InstantiatePrefab(playerPrefab, players[i], tuple.position, Quaternion.Euler(0, 0, tuple.rotation));
                 }
             }
+            else
+            {
+                AfterServerIsConnected(() =>
+                {
+                    Photon.Realtime.Player[] players = Clients;
+                    for (int i = 0; i < players.Length; i++)
+                        players[i].TagObject = i;
+                });
+            }
+        }
+
+        public static (Vector2 position, float rotation) GetSpawnPosition(Photon.Realtime.Player player)
+        {
+            Debug.Assert(player.TagObject != null);
+            return instance.GetSpawnPosition((int)player.TagObject, ClientsCount);
+        }
+
+        private (Vector2 position, float rotation) GetSpawnPosition(int playerIndex, int totalPlayers)
+        {
+            float j = 2 * Mathf.PI * playerIndex / totalPlayers;
+            Vector2 position = (Vector2)transform.position + new Vector2(Mathf.Cos(j), Mathf.Sin(j)) * spawnRadius;
+
+            Vector2 direction = (Vector2.zero - position).normalized;
+            float z = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+
+            return (position, z - 90);
         }
 
         public static void AfterServerIsConnected(Action action)

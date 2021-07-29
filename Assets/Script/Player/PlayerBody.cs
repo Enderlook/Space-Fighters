@@ -99,9 +99,9 @@ namespace Game.Player
         private void RPC_FromDie()
         {
             BecomeInvulnerable();
-            rigidbody.position = Vector2.zero;
-            transform.position = Vector2.zero;
-            rigidbody.rotation = 0;
+            (Vector2 position, float rotation) tuple = Server.GetSpawnPosition(this.GetPlayerOwner());
+            rigidbody.position = tuple.position;
+            rigidbody.rotation = tuple.rotation;
         }
 
         private void BecomeInvulnerable()
