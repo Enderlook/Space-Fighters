@@ -14,10 +14,10 @@ namespace Game.Level
         public const bool IsFullAuth = true;
 
 #pragma warning disable CS0649
-        [SerializeField]
+        [SerializeField, Tooltip("Prefab of player to spawn.")]
         private string playerPrefab;
 
-        [SerializeField]
+        [SerializeField, Tooltip("Radius from center of this transform to spawn players.")]
         private float spawnRadius;
 #pragma warning restore CS0649
 
