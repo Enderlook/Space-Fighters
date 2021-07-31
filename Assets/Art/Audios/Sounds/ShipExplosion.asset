@@ -15,13 +15,13 @@ MonoBehaviour:
   audioClip: {fileID: 8300000, guid: 5307dc30179228040b6ffdf0e2c2895c, type: 3}
   audioType: 0
   volume:
-    isRandom: 0
-    a: 1
-    b: 0
+    isRandom: 1
+    a: 0.9
+    b: 1
   pitch:
-    isRandom: 0
-    a: 1
-    b: 0
+    isRandom: 1
+    a: 0.8
+    b: 1.2
   priority: 128
   stereoSpan: 0
   spatialBlend:
