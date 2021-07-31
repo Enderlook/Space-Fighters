@@ -53,6 +53,7 @@ namespace Game.Level
             {
                 Debug.LogError($"{nameof(Server)} is singlenton.");
                 Destroy(this);
+                return;
             }
             instance = this;
 
