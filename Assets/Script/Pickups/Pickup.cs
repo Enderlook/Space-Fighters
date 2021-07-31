@@ -1,13 +1,14 @@
 ﻿using Game.Level;
+using Game.Player;
 
 using Photon.Pun;
 
 using UnityEngine;
 
-namespace Game.Player
+namespace Game.Pickup
 {
     [DisallowMultipleComponent, RequireComponent(typeof(PhotonView))]
-    public sealed class Bullet : MonoBehaviourPun
+    public abstract class Pickup : MonoBehaviourPun
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Used by Unity.")]
         private void OnTriggerEnter2D(Collider2D collision)
@@ -18,14 +19,13 @@ namespace Game.Player
             if (PlayerScore.HasFinalized)
                 goto end;
 
-            if (collision.TryGetComponent(out PlayerBody player) && player.Hurt())
-            {
-                Photon.Realtime.Player owner = this.GetPlayerOwner();
-                PlayerScore.ChangeCounter(owner, owner == player.GetPlayerOwner());
-            }
+            if (collision.TryGetComponent(out PlayerBody player))
+                Execute(player);
 
             end:
             PhotonNetwork.Destroy(gameObject);
         }
+
+        protected abstract void Execute(PlayerBody player);
     }
 }
