@@ -65,17 +65,17 @@ namespace Game.Player
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Used by Unity.")]
         private void FixedUpdate()
         {
-            if (!body.IsPlayerInputAllowed)
-                return;
-
-            if (Input.GetKey(shootKey))
-                this.RPC_ToServer(shootExpression);
-
             if (loseFireRateAt != 0 && loseFireRateAt <= Time.fixedTime)
             {
                 loseFireRateAt = 0;
                 AudioController.PlayOneShoot(fireRateExpires, rigidbody.position);
             }
+
+            if (!body.IsPlayerInputAllowed)
+                return;
+
+            if (Input.GetKey(shootKey))
+                this.RPC_ToServer(shootExpression);
         }
 
         [PunRPC]
