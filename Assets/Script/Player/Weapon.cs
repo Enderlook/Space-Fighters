@@ -5,6 +5,7 @@ using Game.Level;
 using Photon.Pun;
 
 using System;
+using System.Linq;
 using System.Linq.Expressions;
 
 using UnityEngine;
@@ -40,6 +41,12 @@ namespace Game.Player
 
         [SerializeField, Tooltip("Sound player when fire rate power up recharges.")]
         private AudioUnit fireRateRecharges;
+
+        [SerializeField, Tooltip("Sound player when multi shoot power up expires.")]
+        private AudioUnit multiShootExpires;
+
+        [SerializeField, Tooltip("Sound player when multi shoot power up recharges.")]
+        private AudioUnit multiShootRecharges;
 #pragma warning restore CS0649
 
 #pragma warning disable CS0108
@@ -48,10 +55,13 @@ namespace Game.Player
 
         private float nextShootAt;
         private float loseFireRateAt;
+        private float loseMultiShootAt;
         private PlayerBody body;
+        private Transform[] multishootPoints;
 
         private Expression<Action> shootExpression;
         private Expression<Action<float>> addFireRateExpression;
+        private Expression<Action<float>> addMultiShootExpression;
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Used by Unity.")]
         private void Awake()
@@ -60,6 +70,8 @@ namespace Game.Player
             body = GetComponent<PlayerBody>();
             shootExpression = () => RPC_Shoot();
             addFireRateExpression = (fireRateDuration) => RPC_AddFireRate(fireRateDuration);
+            addMultiShootExpression = (multiShootDuration) => RPC_AddMultiShoot(multiShootDuration);
+            multishootPoints = Enumerable.Range(0, shootPoint.childCount).Select(e => shootPoint.GetChild(e)).ToArray();
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Used by Unity.")]
@@ -69,6 +81,12 @@ namespace Game.Player
             {
                 loseFireRateAt = 0;
                 AudioController.PlayOneShoot(fireRateExpires, rigidbody.position);
+            }
+
+            if (loseMultiShootAt != 0 && loseMultiShootAt <= Time.fixedTime)
+            {
+                loseMultiShootAt = 0;
+                AudioController.PlayOneShoot(multiShootExpires, rigidbody.position);
             }
 
             if (!body.IsPlayerInputAllowed)
@@ -85,11 +103,23 @@ namespace Game.Player
             {
                 float divider = Mathf.Clamp(loseFireRateAt - Time.fixedTime, 0, 2) * .6f + 1;
                 nextShootAt = Time.fixedTime + (shootCooldown / divider);
-                GameObject instance = Server.InstantiatePrefab(projectile, this.GetPlayerOwner(), shootPoint.position, shootPoint.rotation);
-                Rigidbody2D instanceRigidbody = instance.GetComponent<Rigidbody2D>();
-                instanceRigidbody.velocity = rigidbody.velocity;
-                instanceRigidbody.AddForce(shootPoint.up * force, ForceMode2D.Impulse);
                 photonView.RPC(nameof(RPC_PlayShootSound), RpcTarget.All);
+                Photon.Realtime.Player owner = this.GetPlayerOwner();
+
+                Shoot(shootPoint);
+                if (loseMultiShootAt > Time.fixedTime)
+                {
+                    foreach (Transform transform in multishootPoints)
+                        Shoot(transform);
+                }
+
+                void Shoot(Transform shootPoint)
+                {
+                    GameObject instance = Server.InstantiatePrefab(projectile, owner, shootPoint.position, shootPoint.rotation);
+                    Rigidbody2D instanceRigidbody = instance.GetComponent<Rigidbody2D>();
+                    instanceRigidbody.velocity = rigidbody.velocity;
+                    instanceRigidbody.AddForce(shootPoint.up * force, ForceMode2D.Impulse);
+                }
             }
         }
 
@@ -107,6 +137,19 @@ namespace Game.Player
                 loseFireRateAt += fireRateDuration;
 
             AudioController.PlayOneShoot(fireRateRecharges, rigidbody.position);
+        }
+
+        public void AddMultiShoot(float multiShootDuration) => this.RPC_FromServer(addMultiShootExpression, multiShootDuration);
+
+        [PunRPC]
+        private void RPC_AddMultiShoot(float multiShootDuration)
+        {
+            if (loseMultiShootAt < Time.fixedTime)
+                loseMultiShootAt = Time.fixedTime + multiShootDuration;
+            else
+                loseMultiShootAt += multiShootDuration;
+
+            AudioController.PlayOneShoot(multiShootRecharges, rigidbody.position);
         }
     }
 }

@@ -10,3 +10,11 @@ Replenish Life Force Sound made by qubodup under license CC-BY 3.0
 Energy Drain made by qubodup under license CC-BY-SA 3.0, GPL 3.0, GPL 2.0
 	https://opengameart.org/content/energy-drain
 	qubodup-PowerDrain.ogg
+
+UI SFX Pack 2 Sample made by ViRiX under license CC-BY 4.0, CC-BY 3.0
+	https://opengameart.org/content/ui-sfx-pack-2-sample
+	Jingle 001.wav
+
+UI and Item sound effect Jingles Sample 2 made by ViRix under license CC-BY 3.0
+	https://opengameart.org/content/ui-sfx-pack-2-sample
+	Item2A.waav
