@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -40,6 +39,12 @@ namespace Game.Level
             source.RPC(lambda, parameter, RpcTarget.All);
         }
 
+        public static void RPC_FromServer<T1, T2>(this MonoBehaviourPun source, Expression<Action<T1, T2>> lambda, T1 parameter1, T2 parameter2)
+        {
+            Debug.Assert(Server.IsServer);
+            source.RPC(lambda, parameter1, parameter2, RpcTarget.All);
+        }
+
         public static void RPC_FromServer<T1, T2, T3>(this MonoBehaviourPun source, Expression<Action<T1, T2, T3>> lambda, T1 parameter1, T2 parameter2, T3 parameter3)
         {
             Debug.Assert(Server.IsServer);
@@ -53,6 +58,15 @@ namespace Game.Level
         {
             object[] parameters = GetArray(1);
             parameters[0] = parameter;
+            source.RPC(method, parameters, target);
+            ReturnArray(parameters);
+        }
+
+        public static void RPC<T1, T2>(this MonoBehaviourPun source, Expression<Action<T1, T2>> method, T1 parameter1, T2 parameter2, RpcTarget target)
+        {
+            object[] parameters = GetArray(2);
+            parameters[0] = parameter1;
+            parameters[1] = parameter2;
             source.RPC(method, parameters, target);
             ReturnArray(parameters);
         }

@@ -5,8 +5,10 @@ using Game.Menu;
 
 using Photon.Pun;
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 
 using UnityEngine;
 using UnityEngine.UI;
@@ -43,24 +45,32 @@ namespace Game.Level
         private Dictionary<Photon.Realtime.Player, (Color color, int kills, int order)> players = new Dictionary<Photon.Realtime.Player, (Color color, int kills, int order)>();
 
         private static PlayerScore instance;
-        private static PlayerScore Instance {
-            get {
-                if (instance == null)
-                {
-                    instance = FindObjectOfType<PlayerScore>();
-                    int i = 0;
-                    foreach (Photon.Realtime.Player player in Server.Clients)
-                        instance.players.Add(player, (GetPlayerColor(i++), 0, 0));
-                    instance.UpdateValues();
-                }
-                return instance;
-            }
-        }
 
         public static bool HasFinalized { get; internal set; }
 
+        private Expression<Action<Photon.Realtime.Player, bool>> changeCounterExpression;
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Used by Unity.")]
-        private void Awake() => Server.AfterServerIsConnected(() => { PlayerScore _ = Instance; });
+        private void Awake()
+        {
+            if (instance != null)
+            {
+                Debug.LogError($"{nameof(PlayerScore)} is singlenton.");
+                Destroy(this);
+                return;
+            }
+            instance = this;
+
+            changeCounterExpression = (player, decrease) => RPC_ChangeCounter(player, decrease);
+
+            Server.AfterServerIsConnected(() =>
+            {
+                int i = 0;
+                foreach (Photon.Realtime.Player player in Server.Clients)
+                    instance.players.Add(player, (GetPlayerColor(i++), 0, 0));
+                instance.UpdateValues();
+            });
+        }
 
         public override void OnPlayerLeftRoom(Photon.Realtime.Player otherPlayer)
         {
@@ -78,16 +88,16 @@ namespace Game.Level
 
         public static Color GetShipColor(Photon.Realtime.Player owner)
         {
-            Color color = Instance.players[owner].color;
+            Color color = instance.players[owner].color;
             color.SetSaturation(.3f);
             return color;
         }
 
         public static void ChangeCounter(Photon.Realtime.Player player, bool decrease)
-            => Instance.RPC_FromServer(() => Instance.RPC_IncreaseCounter(player, decrease));
+            => instance.RPC_FromServer(instance.changeCounterExpression, player, decrease);
 
         [PunRPC]
-        private void RPC_IncreaseCounter(Photon.Realtime.Player player, bool decrease)
+        private void RPC_ChangeCounter(Photon.Realtime.Player player, bool decrease)
         {
             (Color color, int kills, int) info = players[player];
             int kills = info.kills + (decrease ? -1 : 1);
