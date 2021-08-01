@@ -34,6 +34,12 @@ namespace Game.Player
 
         [SerializeField, Tooltip("Point where bullets are spawn.")]
         private Transform shootPoint;
+
+        [SerializeField, Tooltip("Sound player when fire rate power up expires.")]
+        private AudioUnit fireRateExpires;
+
+        [SerializeField, Tooltip("Sound player when fire rate power up recharges.")]
+        private AudioUnit fireRateRecharges;
 #pragma warning restore CS0649
 
 #pragma warning disable CS0108
@@ -41,9 +47,11 @@ namespace Game.Player
 #pragma warning restore CS0108
 
         private float nextShootAt;
+        private float loseFireRateAt;
         private PlayerBody body;
 
         private Expression<Action> shootExpression;
+        private Expression<Action<float>> addFireRateExpression;
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Used by Unity.")]
         private void Awake()
@@ -51,6 +59,7 @@ namespace Game.Player
             rigidbody = GetComponent<Rigidbody2D>();
             body = GetComponent<PlayerBody>();
             shootExpression = () => RPC_Shoot();
+            addFireRateExpression = (fireRateDuration) => RPC_AddFireRate(fireRateDuration);
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Code Quality", "IDE0051:Remove unused private members", Justification = "Used by Unity.")]
@@ -61,6 +70,12 @@ namespace Game.Player
 
             if (Input.GetKey(shootKey))
                 this.RPC_ToServer(shootExpression);
+
+            if (loseFireRateAt != 0 && loseFireRateAt <= Time.fixedTime)
+            {
+                loseFireRateAt = 0;
+                AudioController.PlayOneShoot(fireRateExpires, rigidbody.position);
+            }
         }
 
         [PunRPC]
@@ -68,7 +83,8 @@ namespace Game.Player
         {
             if (Time.fixedTime >= nextShootAt)
             {
-                nextShootAt = Time.fixedTime + shootCooldown;
+                float divider = Mathf.Clamp(loseFireRateAt - Time.fixedTime, 0, 2) * .6f + 1;
+                nextShootAt = Time.fixedTime + (shootCooldown / divider);
                 GameObject instance = Server.InstantiatePrefab(projectile, this.GetPlayerOwner(), shootPoint.position, shootPoint.rotation);
                 Rigidbody2D instanceRigidbody = instance.GetComponent<Rigidbody2D>();
                 instanceRigidbody.velocity = rigidbody.velocity;
@@ -79,5 +95,18 @@ namespace Game.Player
 
         [PunRPC]
         private void RPC_PlayShootSound() => AudioController.PlayOneShoot(shootSound, rigidbody.position);
+
+        public void AddFireRate(float fireRateDuration) => this.RPC_FromServer(addFireRateExpression, fireRateDuration);
+
+        [PunRPC]
+        private void RPC_AddFireRate(float fireRateDuration)
+        {
+            if (loseFireRateAt < Time.fixedTime)
+                loseFireRateAt = Time.fixedTime + fireRateDuration;
+            else
+                loseFireRateAt += fireRateDuration;
+
+            AudioController.PlayOneShoot(fireRateRecharges, rigidbody.position);
+        }
     }
 }

@@ -720,6 +720,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   pickupPrefabs:
   - PickupShield
+  - PickupFireRate
 --- !u!1 &1269754433
 GameObject:
   m_ObjectHideFlags: 0

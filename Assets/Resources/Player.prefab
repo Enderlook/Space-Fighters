@@ -296,6 +296,8 @@ MonoBehaviour:
   shootCooldown: 0.35
   shootKey: 113
   shootPoint: {fileID: 893431024562968846}
+  fireRateExpires: {fileID: 11400000, guid: eb7db53838724de439a6f7c69bd2f4a9, type: 2}
+  fireRateRecharges: {fileID: 11400000, guid: 5cadd85a69ef64f479d89c546d435ef3, type: 2}
 --- !u!114 &4305191806593427147
 MonoBehaviour:
   m_ObjectHideFlags: 0

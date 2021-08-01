@@ -2,3 +2,11 @@ Bad Sound #2 made by remaxim under license GPL 2.0, GPL 3.0, CC-BY-SA 3.0
 	https://opengameart.org/content/bad-sound-2
 	lose sound 2 - 1_0.wav
 	lose sound 2 - 2.wav
+
+Replenish Life Force Sound made by qubodup under license CC-BY 3.0
+	https://opengameart.org/content/replenish-life-force-sound
+	Replenish.ogg
+
+Energy Drain made by qubodup under license CC-BY-SA 3.0, GPL 3.0, GPL 2.0
+	https://opengameart.org/content/energy-drain
+	qubodup-PowerDrain.ogg
