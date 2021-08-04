@@ -305,7 +305,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   accelerationSpeed: 20
   maximumSpeed: 5
-  brakeStrength: 4
+  brakeStrength: 6
   rotationSpeed: 10
   idleTrigger: Idle
   accelerateTrigger: Accelerate
